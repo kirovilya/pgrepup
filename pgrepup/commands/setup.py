@@ -24,7 +24,7 @@ from .check import checks
 
 
 @dispatch.on('setup')
-def setup():
+def setup(**kwargs):
 
     result = True
     if check_destination_subscriptions():
@@ -43,7 +43,7 @@ def setup():
         puts("")
         with indent(4, quote=' >'):
             output_cli_message("Remove nodes from Destination cluster")
-            print
+            print()
             with indent(4, quote=' '):
                 for db in get_cluster_databases(connect('Destination')):
                     output_cli_message(db)
@@ -56,7 +56,7 @@ def setup():
 
             for t in targets:
                 output_cli_message("Drop pg_logical extension in all databases of %s cluster" % t)
-                print
+                print()
                 with indent(4, quote=' '):
                     for db in get_cluster_databases(connect(t)):
                         output_cli_message(db)
@@ -113,12 +113,12 @@ def _setup_source(conn, pg_pass):
     pg_dumpall_schema = "%s/pg_dumpall_schema_%s.sql" % (get_tmp_folder(), uuid.uuid4().hex)
     output_cli_message("Dump globals and schema of all databases")
     pg_dumpall_schema_result = \
-        os.system('sh -c "PGPASSFILE=%(pgpass)s pg_dumpall -U %(user)s -h %(host)s -p%(port)s -s -f %(fname)s ' +
-                  '--if-exists -c"' %
-                  merge_two_dicts(
-                      get_connection_params('Source'),
-                      {"fname": pg_dumpall_schema, "pgpass": pg_pass}
-                  ))
+        os.system(
+            'sh -c "PGPASSFILE=%(pgpass)s pg_dump -U %(user)s -h %(host)s -p%(port)s -s -f %(fname)s --if-exists -c %(dbname)s"' %
+            merge_two_dicts(
+                get_connection_params('Source'),
+                {"fname": pg_dumpall_schema, "pgpass": pg_pass}
+            ))
     result['result'] = result['result'] and pg_dumpall_schema_result == 0
     print(output_cli_result(result['result']))
 
@@ -126,7 +126,7 @@ def _setup_source(conn, pg_pass):
         result['pg_dumpall'] = pg_dumpall_schema
 
     output_cli_message("Setup pglogical replication sets on Source node name")
-    print
+    print()
     with indent(4, quote=' '):
         for db in get_cluster_databases(conn):
             output_cli_message(db)
@@ -140,7 +140,7 @@ def _setup_source(conn, pg_pass):
     # Automatic Assignment of Replication Sets for New Tables
     # and https://github.com/enova/pgl_ddl_deploy
     output_cli_message("Add triggers to replicate DDL statements on Source node")
-    print
+    print()
     with indent(4, quote=' '):
         for db in get_cluster_databases(conn):
             output_cli_message(db)
@@ -160,8 +160,7 @@ def _setup_destination(conn, pg_pass, source_setup_results):
     if 'pg_dumpall' in source_setup_results:
         restore_schema_result = \
             os.system(
-                'sh -c "PGPASSFILE=%(pgpass)s psql -U %(user)s -h %(host)s -p%(port)s -f %(fname)s -d postgres ' +
-                '>/dev/null 2>&1"'
+                'sh -c "PGPASSFILE=%(pgpass)s psql -U %(user)s -h %(host)s -p%(port)s -f %(fname)s -d postgres >/dev/null 2>&1"'
                 % merge_two_dicts(
                     get_connection_params('Destination'),
                     {"fname": source_setup_results['pg_dumpall'], "pgpass": pg_pass}
@@ -174,7 +173,7 @@ def _setup_destination(conn, pg_pass, source_setup_results):
         print(output_cli_result('Skipped'))
 
     output_cli_message("Setup pglogical Destination node name")
-    print
+    print()
     with indent(4, quote=' '):
         for db in get_cluster_databases(conn):
             output_cli_message(db)
@@ -185,7 +184,7 @@ def _setup_destination(conn, pg_pass, source_setup_results):
     # Automatic Assignment of Replication Sets for New Tables
     # and https://github.com/enova/pgl_ddl_deploy
     output_cli_message("Add triggers to replicate DDL statements on Destination node")
-    print
+    print()
     with indent(4, quote=' '):
         for db in get_cluster_databases(conn):
             output_cli_message(db)

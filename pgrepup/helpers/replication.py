@@ -111,6 +111,27 @@ def start_subscription(db):
         return False
 
 
+def resume_subscription(db):
+    db_conn = connect('Destination', db)
+    db_conn.autocommit = True
+    try:
+        c = db_conn.cursor()
+        c.execute(
+            """
+            SELECT pglogical.create_subscription(
+                                    subscription_name := 'subscription',
+                                    synchronize_structure := false,
+                                    synchronize_data := false,
+                                    provider_dsn := %s
+            );
+            """,
+            [get_dsn_for_pglogical('Source', db)]
+        )
+        return True
+    except Error:
+        return False
+
+
 def syncronize_sequences(db):
     db_conn = connect('Source', db)
     db_conn.autocommit = True
@@ -304,8 +325,8 @@ def get_replication_status(db):
             result["status"] = r['status']
 
     except (psycopg2.InternalError, psycopg2.OperationalError, psycopg2.ProgrammingError) as e:
-        print(e)
         result["result"] = False
+        result["error"] = e
 
     return result
 
@@ -320,7 +341,7 @@ def get_replication_delay():
     d_lsn_r = dest_cur.fetchone()
     if d_lsn_r:
         src_db_version = get_postgresql_version(src_db_conn)
-        if re.match('^10', src_db_version):
+        if re.match('^10', src_db_version) or re.match('^11', src_db_version):
             src_cur.execute("SELECT pg_wal_lsn_diff(pg_current_wal_lsn(), %s)", [d_lsn_r[0]])
         else:
             src_cur.execute("SELECT pg_xlog_location_diff(pg_current_xlog_location(), %s)", [d_lsn_r[0]])

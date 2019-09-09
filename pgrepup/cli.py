@@ -27,6 +27,7 @@ Usage:
   pgrepup [-c config] start
   pgrepup [-c config] status
   pgrepup [-c config] stop
+  pgrepup [-c config] resume
   pgrepup [-c config] uninstall
   pgrepup -h | --help
   pgrepup --version

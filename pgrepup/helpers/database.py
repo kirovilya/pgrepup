@@ -57,14 +57,16 @@ def connect(database, db_name=None):
     try:
         conn = psycopg2.connect(get_dsn(database, db_name))
         return conn
-    except psycopg2.DatabaseError:
-        return None
+    except psycopg2.DatabaseError as err:
+        raise err
 
 
 def get_database_count(conn):
     try:
+        dbname = get_database_name()
         cur = conn.cursor()
-        cur.execute("SELECT COUNT(*) FROM pg_database WHERE datallowconn='t';")
+        cur.execute("SELECT COUNT(*) FROM pg_database WHERE datallowconn='t' "
+                    "and lower(datname) = lower('%s');" % dbname)
         return cur.fetchone()[0]
     except psycopg2.Error:
         return None
@@ -72,14 +74,24 @@ def get_database_count(conn):
 
 def get_cluster_databases(conn):
     try:
+        dbname = get_database_name()
         databases = []
         cur = conn.cursor()
-        cur.execute("SELECT datname FROM pg_database WHERE datallowconn='t';")
+        cur.execute("SELECT datname FROM pg_database WHERE datallowconn='t' "
+                    "and lower(datname) = lower('%s');" % dbname)
         for d in cur.fetchall():
             databases.append(d[0])
         return databases
     except psycopg2.Error:
-        return None
+         return None
+
+
+def get_database_name():
+    if config().has_option('Source', 'database'):
+        db = config().get('Source', 'database')
+    else:
+        db = config().get('Source', 'connect_database')
+    return db
 
 
 def check_extension(conn, extension_name):
@@ -176,7 +188,7 @@ def create_user(conn, username, password):
         row = cur.fetchone()
         if row:
             m = hashlib.md5()
-            m.update(password + username)
+            m.update(password.encode('utf-8') + username.encode('utf-8'))
             encrypted_password = "md5" + m.hexdigest()
             if encrypted_password != row[0]:
                 cur.execute("ALTER USER " + username + " ENCRYPTED PASSWORD %s SUPERUSER REPLICATION", [password])

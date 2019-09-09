@@ -24,7 +24,7 @@ from ..helpers.crypt import decrypt
 
 
 @dispatch.on('status')
-def status():
+def status(**kwargs):
     targets = ['Source', 'Destination']
 
     # Shortcut to ask master password before output Configuration message
@@ -47,7 +47,7 @@ def status():
         for t in targets:
             output_cli_message("%s database cluster" % t)
             setup_results[t] = {}
-            print
+            print()
             with indent(4, quote=' '):
                 for db in get_cluster_databases(connect(t)):
                     output_cli_message(db)
@@ -66,9 +66,10 @@ def status():
                 r = get_replication_status(db)
                 if not r['result']:
                     print(output_cli_result(False))
+                    print(r['error'])
                     continue
                 with indent(4, quote=' '):
-                    print
+                    print()
                     output_cli_message("Replication status")
                     print(output_cli_result(r['status'], compensation=4))
         output_cli_message("Xlog difference (bytes)")

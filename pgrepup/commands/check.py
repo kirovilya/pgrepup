@@ -41,7 +41,7 @@ def check(**kwargs):
         targets.append('Destination')
 
     output_cli_message("Global checkings...", color='cyan')
-    print
+    print()
 
     with indent(4, quote=' >'):
         output_cli_message("Folder %s exists and is writable" % get_tmp_folder())
@@ -50,7 +50,7 @@ def check(**kwargs):
 
     for t in targets:
         output_cli_message("Checking %s..." % t, color='cyan')
-        print
+        print()
         with indent(4, quote=' >'):
             output_cli_message("Connection PostgreSQL connection to %(host)s:%(port)s with user %(user)s" %
                                get_connection_params(t))
@@ -64,7 +64,7 @@ def check(**kwargs):
             c = checks(t, 'pglogical_installed', db_conn=conn)
             if c['results']['pglogical_installed'] == 'NotInstalled':
                 print(output_cli_result(False))
-                print
+                print()
                 output_hint("Install docs at " +
                             "https://2ndquadrant.com/it/resources/pglogical/pglogical-installation-instructions/\n")
             elif c['results']['pglogical_installed'] == 'InstalledNoSharedLibraries':
@@ -77,7 +77,7 @@ def check(**kwargs):
             c = checks(t, 'pg_ddl_deploy_installed', db_conn=conn)
             if c['results']['pg_ddl_deploy_installed'] == 'NotInstalled':
                 print(output_cli_result(False))
-                print
+                print()
                 output_hint("Install docs at https://github.com/enova/pgl_ddl_deploy\n")
             elif c['results']['pg_ddl_deploy_installed'] == 'InstalledNoSharedLibraries':
                 print(output_cli_result(False))
@@ -127,14 +127,14 @@ def check(**kwargs):
             if t == 'Source':
                 output_cli_message("Source cluster tables without primary keys")
                 c = checks(t, 'src_databases', db_conn=conn)
-                print
+                print()
                 with indent(4, quote=' '):
                     for db in c['data']['src_databases'].keys():
                         output_cli_message(db)
                         if len(c['data']['src_databases'][db].keys()) == 0:
                             print(output_cli_result(True, compensation=4))
                         else:
-                            print
+                            print()
                             with indent(4, quote=' '):
                                 for table in c['data']['src_databases'][db].keys():
                                     output_cli_message(table)
@@ -304,16 +304,16 @@ def checks(target, single_test=None, db_conn=None):
             if db_version.count('.') < 2:
                 db_version += '.0'
 
-            pg_dumpall_exists = os.system("which pg_dumpall >/dev/null") == 0
+            pg_dumpall_exists = os.system("which pg_dump >/dev/null") == 0
 
             if not pg_dumpall_exists:
                 reusable_results['pg_dumpall'] = "Install postgresql client utils locally."
                 checks_result[c] = False
                 continue
             # see semver._REGEX
-            pgdumpall_version_rule = re.compile(r""".*pg_dumpall \(PostgreSQL\) ([0-9.]+).*""")
-            pg_dumpall_version = subprocess.check_output(["pg_dumpall", "--version"])
-            pg_dumpall_version = pgdumpall_version_rule.match(pg_dumpall_version)
+            pgdumpall_version_rule = re.compile(r""".*pg_dump \(PostgreSQL\) ([0-9.]+).*""")
+            pg_dumpall_version = subprocess.check_output(["pg_dump", "--version"])
+            pg_dumpall_version = pgdumpall_version_rule.match(pg_dumpall_version.decode('utf-8'))
             if not pg_dumpall_version:
                 reusable_results['pg_dumpall'] = "Install PostgreSQL client utils locally."
                 checks_result[c] = False

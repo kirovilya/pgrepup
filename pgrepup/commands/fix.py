@@ -21,13 +21,13 @@ from clint.textui import colored, indent
 
 
 @dispatch.on('fix')
-def fix():
+def fix(**kwargs):
 
     # Shortcut to ask master password before output Configuration message
     decrypt(config().get('Source', 'password'))
 
     output_cli_message("Find Source cluster's databases with tables without primary key/unique index...", color='cyan')
-    print
+    print()
 
     db_conn = connect('Source')
     with indent(4, quote=' >'):
@@ -40,7 +40,7 @@ def fix():
                     t_r = table_has_primary_key(s_db_conn, table['schema'], table['table'])
                     if not t_r:
                         tables_without_unique = True
-                        print
+                        print()
                         output_cli_message("Found %s.%s without primary key" % (table['schema'], table['table']))
                         result = add_table_unique_index(s_db_conn, table['schema'], table['table'])
                         print(output_cli_result(

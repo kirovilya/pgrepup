@@ -22,25 +22,25 @@ from .stop import stop
 
 
 @dispatch.on('uninstall')
-def uninstall():
+def uninstall(**kwargs):
     stop()
 
     output_cli_message("Uninstall operations", color='cyan')
     puts("")
     with indent(4, quote=' >'):
         output_cli_message("Remove nodes from Destination cluster")
-        print
+        print()
         with indent(4, quote=' '):
             for db in get_cluster_databases(connect('Destination')):
                 output_cli_message(db)
                 drop_node(db)
                 print(output_cli_result(True, 4))
         output_cli_message("Drop pgl_ddl_deploy extension in all databases")
-        print
+        print()
         with indent(4, quote=' '):
             for t in ['Source', 'Destination']:
                 output_cli_message(t)
-                print
+                print()
                 with indent(4, quote=' '):
                     for db in get_cluster_databases(connect(t)):
                         output_cli_message(db)
@@ -50,11 +50,11 @@ def uninstall():
                         print(output_cli_result(True, compensation=8))
 
         output_cli_message("Drop pg_logical extension in all databases")
-        print
+        print()
         with indent(4, quote=' '):
             for t in ['Source', 'Destination']:
                 output_cli_message(t)
-                print
+                print()
                 with indent(4, quote=' '):
                     for db in get_cluster_databases(connect(t)):
                         output_cli_message(db)
@@ -85,5 +85,4 @@ def uninstall():
                             dest_d_db_conn, table['schema'], table['table'], get_unique_field_name()
                         )
                         print(output_cli_result(s and d, compensation=12))
-
 

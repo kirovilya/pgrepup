@@ -6,3 +6,4 @@ from .start import start
 from .status import status
 from .uninstall import uninstall
 from .fix import fix
+from .resume import resume
