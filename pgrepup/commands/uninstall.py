@@ -67,12 +67,12 @@ def uninstall(**kwargs):
         print(output_cli_result(drop_user(connect('Source'), get_pgrepup_replication_user())))
 
         output_cli_message("Drop unique fields added by fix command")
-        print
+        print()
         with indent(8, quote=' '):
             src_db_conn = connect('Source')
             for db in get_cluster_databases(src_db_conn):
                 output_cli_message(db)
-                print
+                print()
                 src_d_db_conn = connect('Source', db_name=db)
                 dest_d_db_conn = connect('Destination', db_name=db)
                 with indent(4, quote=' '):

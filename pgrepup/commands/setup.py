@@ -114,7 +114,7 @@ def _setup_source(conn, pg_pass):
     output_cli_message("Dump globals and schema of all databases")
     pg_dumpall_schema_result = \
         os.system(
-            'sh -c "PGPASSFILE=%(pgpass)s pg_dump -U %(user)s -h %(host)s -p%(port)s -s -f %(fname)s --if-exists -c %(dbname)s"' %
+            'sh -c "PGPASSFILE=%(pgpass)s pg_dump -U %(user)s -h %(host)s -p%(port)s -s -f %(fname)s --if-exists -C -c %(dbname)s"' %
             merge_two_dicts(
                 get_connection_params('Source'),
                 {"fname": pg_dumpall_schema, "pgpass": pg_pass}
