@@ -156,6 +156,11 @@ def _setup_source(conn, pg_pass):
 
 def _setup_destination(conn, pg_pass, source_setup_results):
     result = {'result': True}
+    output_cli_message("Create user for replication")
+    result['result'] = result['result'] and create_user(conn,
+                                                        get_pgrepup_replication_user(),
+                                                        get_pgrepup_user_password())
+    print(output_cli_result(result['result']))
     output_cli_message("Create and import source globals and schema")
     if 'pg_dumpall' in source_setup_results:
         restore_schema_result = \
