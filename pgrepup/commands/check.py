@@ -227,9 +227,13 @@ def checks(target, single_test=None, db_conn=None):
         elif c == 'wal_level':
             if not db_conn:
                 continue
-            needed_value = "logical"
-            current_value = get_setting_value(db_conn, 'wal_level')
-            checks_result[c] = current_value == needed_value
+            if target == 'Destination':
+                # Do not check for target
+                checks_result[c] = True
+            else:
+                needed_value = "logical"
+                current_value = get_setting_value(db_conn, 'wal_level')
+                checks_result[c] = current_value == needed_value
 
         elif c == 'max_wal_senders':
             if not db_conn:
